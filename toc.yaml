@@ -1,0 +1,13 @@
+title: ТРПО
+href: index.yaml
+items:
+  - name: Git
+    href: ./GitGuide.md
+  - name: Build
+    href: ./Build.md
+  - name: Debug
+    href: ./Debug.md
+  - name: Tesing
+    href: ./Testing.md
+  - name: Exam
+    href: ./Exam.md

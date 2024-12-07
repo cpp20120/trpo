@@ -1,0 +1,21 @@
+title: Guide
+description: Гайд по ТРПО для начинающих
+meta:
+  title: Метаданные
+  noIndex: true
+links:
+- title: Гайд по гиту
+  description: Гайд по гиту для начинающих.
+  href: GitGuide.md
+- title: Гайд по сборке
+  description: Гайд по сборке C/C++
+  href: Build.md
+- title: Гайд по дебагу
+  description: Гайд по дебагу C/C++
+  href: Debug.md
+- title: Гайд по тестированию
+  description: Гайд по тестированию кода на C/C++
+  href: Testing.md
+- title: Экзамен
+  description: Ответы на вопросы к экзамену
+  href: Exam.md
