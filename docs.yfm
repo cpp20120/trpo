@@ -3,5 +3,5 @@ connector:
   type: github
   github:
     endpoint https://api.github.com
-    owner: cppshizoidS
-    repo: TRPO
+    owner: cpp20120
+    repo: trpo
