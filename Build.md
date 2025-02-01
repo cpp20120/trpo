@@ -2,6 +2,9 @@
 # Гайд по сборке C/C++ для начинающих
 
 Исходный C++ файл который вы пишете в .c и .cpp это всего лишь код, его нельзя запустить напрямую. Чтобы из .c/.cpp получить .exe/.dll(на windows) .out, .so(на linux) его необходимо скомпилировать.
+
+Работы будут выполняться на linux поэтому вот сетпа рабочего окружения под него:
+
 ## Нужные пакеты на linux
 
 Сохраните это как setup_script.sh
@@ -9,18 +12,26 @@
 ```bash
 #!/bin/bash
 # Проверка типа дистрибутива
+#!/bin/bash
 if [ -x "$(command -v apt-get)" ]; then
+    sudo add-apt-repository contrib
+    sudo add-apt-repository non-free
     sudo apt-get update
-    sudo apt-get install -y build-essential neofetch git clang clang-tools gcc cmake make ninja-build lld lldb valgrind clang-format gtest
-
+    sudo apt-get install -y  build-essential neofetch git clang clang-tools mold clang-format gcc cmake ninja-build lld lldb valgrind libgtest-dev lcov gcovr python3-pip doxygen neovim qtbase5-dev qt6-base-dev libglfw3 libglfw3-dev glew-utils libglew-dev libglm-dev libvulkan1 vulkan-validationlayers glslang-dev spirv-tools spirv-cross libsdl2-dev libsfml-dev
 elif [ -x "$(command -v dnf)" ]; then
-    sudo dnf install -y @development-tools neofetch git clang clang-tools-extra gcc cmake make ninja-build lld lldb valgrind gtest
-
-
+    sudo dnf install -y dnf5
+    sudo dnf5 install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+    sudo dnf5 install -y https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+    sudo dnf5 install -y  @development-tools neofetch git clang clang-tools-extra compiler-rt mold gcc cmake ninja-build lld lldb valgrind lcov gcovr python3 python3-pip gtest doxygen neovim SFML SFML-devel SDL2-devel SDL2 qt5-qtbase-devel qt5-qtbase qt6-core qt6-qtbase qt6-qtbase-devel qt6-qtmultimedia glfw glm-devel glew vulkan-headers vulkan-loader vulkan-tools vulkan-volk-devel glslang spirv-tools spirv-llvm-translator
+elif [ -x "$(command -v pacman)" ]; then
+    sudo pacman -Syyu --noconfirm  base-devel neofetch neovim python python-pip lua git clang mold compiler-rt gcc cmake doxygen ninja make lld lldb valgrind gcov gcovr lcov gtest qt5-base qt5-multimedia qt5-quick3d qt6-tools qt6-quick3d qt6-multimedia glfw glew glm vulkan-extra-layers vulkan-extra-tools vulkan-headers vulkan-tools vulkan-validation-layers spirv-llvm-translator sfml sdl2_image sdl2-compat
+elif [ -x "$(command -v brew)" ]; then
+    brew install  xcodebuild neofetch neovim python3 git clang cmake doxygen ninja make lld lldb valgrind lcov gcovr qt5 qt6 glfw glew glm vulkan-headers vulkan-loader vulkan-tools vulkan-extenstionlayer vulkan-validationlayer spirv-cross spirv-headers spirv-llvm-translator xcode-build-server googletest sfml sdl2 sdl2_image
 else
     echo "Не удалось определить дистрибутив и установщик пакетов."
     exit 1
 fi
+
 
 ```
 gcc или clang на выбор
@@ -169,6 +180,54 @@ clean:
 `./hello`
 
 
+## Линковка библиотек в Make
+Пример с SFML
+Для линковки SFML в Makefile нужно указать пути к заголовочным файлам и библиотекам, а также флаги компиляции.
+
+Пример Makefile для проекта с SFML:
+
+```makefile
+CXX = g++
+CXXFLAGS = -Wall -Wextra -std=c++17
+LDFLAGS = -lsfml-system -lsfml-window -lsfml-graphics -lsfml-audio -lsfml-network
+
+SRC = main.cpp
+TARGET = MySFMLProject
+
+$(TARGET): $(SRC)
+	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SRC) $(LDFLAGS)
+
+clean:
+	rm -f $(TARGET)
+```
+
+Объяснение:
+```LDFLAGS = -lsfml-system -lsfml-window -lsfml-graphics -lsfml-audio -lsfml-network ```— флаги для линковки SFML.
+
+```$(CXX) $(CXXFLAGS) -o $(TARGET) $(SRC) $(LDFLAGS)``` — команда для компиляции и линковки.
+
+
+Пример с SDL2
+Пример Makefile для проекта с SDL2:
+
+```makefile
+CXX = g++
+CXXFLAGS = -Wall -Wextra -std=c++17
+LDFLAGS = -lSDL2
+
+SRC = main.cpp
+TARGET = MySDLProject
+
+$(TARGET): $(SRC)
+	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SRC) $(LDFLAGS)
+
+clean:
+	rm -f $(TARGET)
+```
+
+Объяснение:
+LDFLAGS = -lSDL2 — флаг для линковки SDL2.
+
 ## Сборка проектов использующих [cmake](https://cmake.org/) 
 Часто вы можете увидеть проекты в корне которых есть файл CMakeLists.txt это файл описания генерации файлов сборки при помощи cmake
 
@@ -218,7 +277,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-file(GLOB SOURCE_FILE src/*.cpp)
+file(GLOB SOURCE_FILE src/*.cpp) # на самом деле так лучше не делать но для пока и так норм
 add_executable(project ${SOURCE_FILE})
 
 target_include_directories(project PRIVATE include)
@@ -313,3 +372,50 @@ include_directories("../MyStaticLibrary")
 target_link_libraries(exampleStatic mystatilib)
 ```
 [Шаблон проекта использующего cmake](https://github.com/cppshizoidS/cmake_boilerplate)
+
+
+Пример CMakeLists.txt для проекта с SFML:
+
+```cmake
+cmake_minimum_required(VERSION 3.20)
+project(MySFMLProject)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Поиск SFML
+find_package(SFML REQUIRED COMPONENTS system window graphics audio network)
+
+# Добавление исполняемого файла
+add_executable(MySFMLProject main.cpp)
+
+# Линковка SFML
+target_link_libraries(MySFMLProject PRIVATE sfml-system sfml-window sfml-graphics sfml-audio sfml-network)
+Объяснение:
+find_package(SFML REQUIRED COMPONENTS system window graphics audio network) # ищет SFML и его компоненты (system, window, graphics, audio, network). Если библиотека не найдена, CMake #выдаст ошибку.
+
+```
+
+Пример CMakeLists.txt для проекта с SDL2:
+
+```cmake
+cmake_minimum_required(VERSION 3.20)
+project(MySDLProject)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Поиск SDL2
+find_package(SDL2 REQUIRED)
+
+# Добавление исполняемого файла
+add_executable(MySDLProject main.cpp)
+
+# Линковка SDL2
+target_link_libraries(MySDLProject PRIVATE SDL2::SDL2)
+```
+
+Объяснение:
+find_package(SDL2 REQUIRED) — ищет SDL2. Если библиотека не найдена, CMake выдаст ошибку.
+
+target_link_libraries(MySDLProject PRIVATE SDL2::SDL2) — линкует SDL2 с вашим проектом.
