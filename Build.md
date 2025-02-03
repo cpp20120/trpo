@@ -278,7 +278,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 file(GLOB SOURCE_FILE src/*.cpp) # на самом деле так лучше не делать но для пока и так норм
-add_executable(project ${SOURCE_FILE})
+#лучше делать вот так:
+add_executable(${CMAKE_PROJECT_NAME} main.cpp) # и перечеслять остльаные файлы тут
 
 target_include_directories(project PRIVATE include)
 target_compile_options(project PRIVATE -Wall -Wextra)
@@ -297,6 +298,8 @@ target_compile_options(project PRIVATE -Wall -Wextra)
 
 - `file(GLOB SOURCE_FILE src/*.cpp)`: Создает список исходных файлов, автоматически добавляя все файлы с расширением ".cpp" из директории "src" в переменную SOURCE_FILE.
 
+- `add_executable(${CMAKE_PROJECT_NAME} <sources>.cpp main.cpp)`: Явное перечисление списка исходных файлов, ручное но это лучше чтобы не перегенерировать cmake при добавлении файла.
+  
 - `add_executable(project ${SOURCE_FILE})`: Создает исполняемый файл с именем "project" из перечисленных в SOURCE_FILE исходных файлов.
 
 - `target_include_directories(project PRIVATE include)`: Добавляет директорию "include" к путям поиска заголовочных файлов для проекта. Все файлы в этой директории будут доступны только для компиляции этого проекта (PRIVATE).
